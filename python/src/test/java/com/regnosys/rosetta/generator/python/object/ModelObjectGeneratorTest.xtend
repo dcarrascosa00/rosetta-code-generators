@@ -893,7 +893,24 @@ class ModelObjectGeneratorTest {
         assertTrue(python.toString.contains(expectedB))
     }
 	
-	
+	@Test
+	def void f() {
+		val python = 
+		'''
+		type A:
+			b B(0..1)
+			condition Cond:
+			    b->c->d exists
+			
+		type B:
+			c C(0..1)
+		type C:
+			d D(0..1)
+		type D:
+			a int(0..1)
+		'''.generatePython
+		println(python)
+	}
 	
 	def generatePython(CharSequence model) {
 		val m = model.parseRosettaWithNoErrors
