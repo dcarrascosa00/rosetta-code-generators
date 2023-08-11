@@ -130,9 +130,7 @@ class  PythonFunctionGenerator {
  
     	val output = function.output
     	val defaultClassName = function.name+"Default"
-  		
-
-		
+  	
 		'''
 		class «function.name»(ABC):
 		«IF function.definition !== null»
@@ -218,15 +216,15 @@ class  PythonFunctionGenerator {
 		    «IF op.add»
 				addVar«n_condition» = returnResult_«n_condition»()
 				«IF op.path !== null»
-					«function.output.name».«outputWithSegment(op.path)».extend(addVar«n_condition»)
+				«setAttributes(op.path,function,"returnResult",n_condition)»
 				«ELSE»
 					«function.output.name».extend(addVar«n_condition»)
 				«ENDIF»
 			«ELSE»
 				«IF op.path !== null»
-					«function.output.name».«outputWithSegment(op.path)» = returnResult_«n_condition»()
+				«setAttributes(op.path,function,"returnResult",n_condition)» 
 				«ELSE»
-					«function.output.name» = returnResult_«n_condition»()
+				«function.output.name» = returnResult_«n_condition»()
 				«ENDIF»
 			«ENDIF»
 		«ENDIF»
@@ -252,15 +250,21 @@ class  PythonFunctionGenerator {
 		'''
 	}
 	
-	private def outputWithSegment(Segment s) {
-		var output = ""
-		output+=s.attribute.name
+	
+	def private setAttributes(Segment s,Function function,String returnResult,int n_condition) {
+		
+		var parenthesis = 0
 		var next = s
-		while (next.next != null) {
+		var out = "_set_attr("+'"'+function.output.name+'"'+","
+		while (next !== null) {
+			out+="_set_attr("+'"'+next.attribute.name+'"'+","
 			next = next.next
-			output += "."+next.attribute.name
+			parenthesis++
 		}
-		output
+		out+= returnResult+"_"+n_condition+")"
+		for (var j = 0;j<parenthesis;j++) out+=")"
+		'''«out»'''
+		
 	}
 
 	def addImportsFromConditions(String variable, String namespace) {

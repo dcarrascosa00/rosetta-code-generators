@@ -1,8 +1,6 @@
 package com.regnosys.rosetta.generator.python.func
 
 import com.google.inject.Inject
-import com.regnosys.rosetta.rosetta.RosettaModel
-
 import com.regnosys.rosetta.tests.RosettaInjectorProvider
 import com.regnosys.rosetta.tests.util.ModelHelper
 
@@ -161,20 +159,6 @@ class PythonFunctionsTest {
     	
 		val expected =
 		'''
-		class AppendToVector(ABC):
-		"""
-		Append a single value to a vector (list of numbers).
-		"""
-			def evaluate(self,value, vector=None):
-				resultVector = self.doEvaluate(value, vector)
-				return resultVector
-			
-			@abstractmethod
-			def doEvaluate(self,value, vector=None):
-				pass
-			
-			
-		
 		class AppendToVectorDefault(AppendToVector):
 			def doEvaluate(self,value, vector=None):
 				resultVector=[]
@@ -184,7 +168,7 @@ class PythonFunctionsTest {
 				def returnResult_0():
 					return _resolve_rosetta_attr(self, "value")
 				addVar0 = returnResult_0()
-				resultVector.value1.value2.extend(addVar0)
+				_set_attr("resultVector",_set_attr("value1",_set_attr("value2",returnResult_0)))
 				
 				def returnResult_1():
 					return _resolve_rosetta_attr(self, "vector")
@@ -305,22 +289,9 @@ class PythonFunctionsTest {
     		HDD <"Heating Degree Day as a standard unit.">
     	'''.generatePython
     	
+    	println(python)
 		val expected =
 		'''
-		class Create_UnitType(ABC):
-		"""
-		Create UnitType with given currency or financial unit.
-		"""
-			def evaluate(self,currency=None, financialUnit=None):
-				unitType = self.doEvaluate(currency, financialUnit)
-				return unitType
-			
-			@abstractmethod
-			def doEvaluate(self,currency=None, financialUnit=None):
-				pass
-			
-			
-		
 		class Create_UnitTypeDefault(Create_UnitType):
 			def doEvaluate(self,currency=None, financialUnit=None):
 				unitType=UnitType()
@@ -329,11 +300,11 @@ class PythonFunctionsTest {
 			def assignOutput(self,unitType,currency=None, financialUnit=None):
 				def returnResult_0():
 					return _resolve_rosetta_attr(self, "currency")
-				unitType.currency = returnResult_0()
+				_set_attr("unitType",_set_attr("currency",returnResult_0)) 
 				
 				def returnResult_1():
 					return _resolve_rosetta_attr(self, "financialUnit")
-				unitType.financialUnit = returnResult_1()
+				_set_attr("unitType",_set_attr("financialUnit",returnResult_1)) 
 				
 				return unitType
 		'''
@@ -397,11 +368,11 @@ class PythonFunctionsTest {
 				Assigns the observed value to the reset value.
 				"""
 					return _resolve_rosetta_attr(_resolve_rosetta_attr(self, "observation"), "observedValue")
-				reset.resetValue = returnResult_0()
+				_set_attr("reset",_set_attr("resetValue",returnResult_0)) 
 				
 				def returnResult_1():
 					return _resolve_rosetta_attr(self, "date")
-				reset.resetDate = returnResult_1()
+				_set_attr("reset",_set_attr("resetDate",returnResult_1)) 
 				
 				def returnResult_2():
 				"""
@@ -409,7 +380,7 @@ class PythonFunctionsTest {
 				"""
 					return _resolve_rosetta_attr(self, "observation")
 				addVar2 = returnResult_2()
-				reset.observations.extend(addVar2)
+				_set_attr("reset",_set_attr("observations",returnResult_2))
 				
 				return reset
 		'''
@@ -437,6 +408,8 @@ class PythonFunctionsTest {
     	  		type UnitType: <"Defines the unit to be used for price, quantity, or other purposes">
     	  			value int (1..1)
     	'''.generatePython
+    	
+    	println(python)
     	
 		val expected =
 		'''
@@ -471,7 +444,7 @@ class PythonFunctionsTest {
 		
     }
     
-     @Test
+    @Test
     def void testWithEnumAttr() {
     	//Test a set output constructor having attributes as enums
     	
@@ -663,7 +636,7 @@ class PythonFunctionsTest {
     		def assignOutput(self,c,a, b):
     			def returnResult_0():
     				return (self.Alias1(a, b) * self.Alias2(a, b))
-    			c.valueC = returnResult_0()
+    			_set_attr("c",_set_attr("valueC",returnResult_0)) 
     			
     			return c
     			
@@ -720,23 +693,9 @@ class PythonFunctionsTest {
     		set identifiers -> observationDate:
     			date
     	'''.generatePython
-    	
+    	println(python)
 		val expected = 
 		'''
-		class ResolveInterestRateObservationIdentifiers(ABC):
-		"""
-		Defines which attributes on the InterestRatePayout should be used to locate and resolve the underlier's price, for example for the reset process.
-		"""
-			def evaluate(self,payout, date):
-				identifiers = self.doEvaluate(payout, date)
-				return identifiers
-			
-			@abstractmethod
-			def doEvaluate(self,payout, date):
-				pass
-			
-			
-		
 		class ResolveInterestRateObservationIdentifiersDefault(ResolveInterestRateObservationIdentifiers):
 			def doEvaluate(self,payout, date):
 				identifiers=ObservationIdentifier()
@@ -745,11 +704,11 @@ class PythonFunctionsTest {
 			def assignOutput(self,identifiers,payout, date):
 				def returnResult_0():
 					return _resolve_rosetta_attr(_resolve_rosetta_attr(_resolve_rosetta_attr(_resolve_rosetta_attr(self, "payout"), "rateSpecification"), "floatingRate"), "rateOption")
-				identifiers.observable.rateOption = returnResult_0()
+				_set_attr("identifiers",_set_attr("observable",_set_attr("rateOption",returnResult_0))) 
 				
 				def returnResult_1():
 					return _resolve_rosetta_attr(self, "date")
-				identifiers.observationDate = returnResult_1()
+				_set_attr("identifiers",_set_attr("observationDate",returnResult_1)) 
 				
 				return identifiers
 		'''
