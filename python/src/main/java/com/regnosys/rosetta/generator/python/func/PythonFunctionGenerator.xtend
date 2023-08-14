@@ -130,7 +130,7 @@ class  PythonFunctionGenerator {
  
     	val output = function.output
     	val defaultClassName = function.name+"Default"
-  	
+  		
 		'''
 		class «function.name»(ABC):
 		«IF function.definition !== null»
@@ -139,6 +139,9 @@ class  PythonFunctionGenerator {
 			"""
 		«ENDIF»
 			def evaluate(self,«generatesInputs(function)»):
+				«IF function.conditions !== null»
+					«FOR cond : function.conditions SEPARATOR "\n"»assert «generateExpression(cond.expression,function,0)»«ENDFOR»
+				«ENDIF»
 				«output.name» = self.doEvaluate(«generatesInputsParameters(function)»)
 				return «output.name»
 			

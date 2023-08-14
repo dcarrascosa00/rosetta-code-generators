@@ -289,7 +289,6 @@ class PythonFunctionsTest {
     		HDD <"Heating Degree Day as a standard unit.">
     	'''.generatePython
     	
-    	println(python)
 		val expected =
 		'''
 		class Create_UnitTypeDefault(Create_UnitType):
@@ -408,8 +407,6 @@ class PythonFunctionsTest {
     	  		type UnitType: <"Defines the unit to be used for price, quantity, or other purposes">
     	  			value int (1..1)
     	'''.generatePython
-    	
-    	println(python)
     	
 		val expected =
 		'''
@@ -693,7 +690,7 @@ class PythonFunctionsTest {
     		set identifiers -> observationDate:
     			date
     	'''.generatePython
-    	println(python)
+    	
 		val expected = 
 		'''
 		class ResolveInterestRateObservationIdentifiersDefault(ResolveInterestRateObservationIdentifiers):
@@ -716,6 +713,94 @@ class PythonFunctionsTest {
     	
     }
     
+    @Test
+    def void testOneCondition() {
+    	val python =
+    	'''
+    	func RoundToNearest:
+    		inputs:
+    			value number (1..1)
+    			nearest number (1..1)
+    			roundingMode RoundingModeEnum (1..1)
+    		output:
+    			roundedValue number (1..1)
+    		condition PositiveNearest:
+    			nearest > 0
+    	enum RoundingModeEnum:
+    		Down
+    		Up
+    	'''.generatePython
+    	
+    	val expected = 
+    	'''
+    	class RoundToNearest(ABC):
+    		def evaluate(self,value, nearest, roundingMode):
+    			assert all_elements(_resolve_rosetta_attr(self, "nearest"), ">", 0)
+    			roundedValue = self.doEvaluate(value, nearest, roundingMode)
+    			return roundedValue
+    		
+    		@abstractmethod
+    		def doEvaluate(self,value, nearest, roundingMode):
+    			pass
+    		
+    		
+    	
+    	class RoundToNearestDefault(RoundToNearest):
+    		def doEvaluate(self,value, nearest, roundingMode):
+    			roundedValue=None
+    			return self.assignOutput(roundedValue,value, nearest, roundingMode)
+    						
+    		def assignOutput(self,roundedValue,value, nearest, roundingMode):
+    			return roundedValue
+    	'''
+    	assertTrue(python.toString.contains(expected))
+    }
+    
+    @Test
+    def void testMultipleConditions() {
+    	val python =
+    	'''
+    	func RoundToNearest:
+    		inputs:
+    			value number (1..1)
+    			nearest number (1..1)
+    			roundingMode RoundingModeEnum (1..1)
+    		output:
+    			roundedValue number (1..1)
+    		condition PositiveNearest:
+    			nearest > 0
+    		condition valueNegative:
+    		    value < 0
+    	enum RoundingModeEnum:
+    		Down
+    		Up
+    	'''.generatePython
+    	
+    	val expected =
+    	'''
+    	class RoundToNearest(ABC):
+    		def evaluate(self,value, nearest, roundingMode):
+    			assert all_elements(_resolve_rosetta_attr(self, "nearest"), ">", 0)
+    			assert all_elements(_resolve_rosetta_attr(self, "value"), "<", 0)
+    			roundedValue = self.doEvaluate(value, nearest, roundingMode)
+    			return roundedValue
+    		
+    		@abstractmethod
+    		def doEvaluate(self,value, nearest, roundingMode):
+    			pass
+    		
+    		
+    	
+    	class RoundToNearestDefault(RoundToNearest):
+    		def doEvaluate(self,value, nearest, roundingMode):
+    			roundedValue=None
+    			return self.assignOutput(roundedValue,value, nearest, roundingMode)
+    						
+    		def assignOutput(self,roundedValue,value, nearest, roundingMode):
+    			return roundedValue
+    	'''
+    	assertTrue(python.toString.contains(expected))
+    }
     
 
 	def generatePython(CharSequence model) {

@@ -13,6 +13,7 @@ __all__ = ['if_cond', 'if_cond_fn', 'Multiprop', 'rosetta_condition',
            'BaseDataClass', 'ConditionViolationError', 'any_elements',
            'all_elements', 'contains', 'disjoint', 'join', 
            '_resolve_rosetta_attr',
+           '_set_attr',
            'check_cardinality',
            'AttributeWithMeta',
            'AttributeWithAddress',
@@ -44,6 +45,11 @@ def _resolve_rosetta_attr(obj: Any|None, attrib: str) -> Any|list[Any]|None:
                if item is not None]
         return res if res else None
     return getattr(obj, attrib, None)
+    
+def _set_attr(obj: Any|None, value: str) -> Any|list[Any]|None:
+    if isinstance(obj, (list, tuple)):
+        obj.extend(value)
+    obj = value
 
 
 def _to_list(obj):
