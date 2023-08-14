@@ -50,6 +50,8 @@ import com.regnosys.rosetta.rosetta.expression.FilterOperation
 import com.regnosys.rosetta.rosetta.expression.EqualityOperation
 import com.regnosys.rosetta.rosetta.TypeParameter
 import com.regnosys.rosetta.rosetta.expression.InlineFunction
+import org.eclipse.emf.common.util.EList
+import com.regnosys.rosetta.rosetta.simple.Condition
 
 class  PythonFunctionGenerator {
 	
@@ -140,7 +142,7 @@ class  PythonFunctionGenerator {
 		«ENDIF»
 			def evaluate(self,«generatesInputs(function)»):
 				«IF function.conditions !== null»
-					«FOR cond : function.conditions SEPARATOR "\n"»assert «generateExpression(cond.expression,function,0)»«ENDFOR»
+					«generateFuncConditions(function,function.conditions)»
 				«ENDIF»
 				«output.name» = self.doEvaluate(«generatesInputsParameters(function)»)
 				return «output.name»
@@ -159,6 +161,9 @@ class  PythonFunctionGenerator {
 							
 			def assignOutput(self,«output.name»,«generatesInputs(function)»):
 				«generateConditions(function)»  
+				«IF function.postConditions !== null»	
+					«generateFuncConditions(function,function.postConditions)»	
+				«ENDIF»
 				return «output.name»
 				
 			«IF function.shortcuts !== null»
@@ -169,6 +174,43 @@ class  PythonFunctionGenerator {
 			«ENDIF»	
 		'''
 	}
+	
+	private def generateFuncConditions(Function function,EList<Condition> cond) {
+		var n_condition = 0;
+		var res = "";
+		for (Condition c : cond) {
+		    res += generateFuncConditionBoilerplate(c,n_condition)+
+		    generateFuncExpressionCondition(function,c.expression,n_condition).toString+
+		    "assert Condition_"+ n_condition.toString()+"()\n"
+			n_condition += 1;
+		}
+		return res
+	}
+	
+	private def generateFuncConditionBoilerplate(Condition c,int n_condition) {
+		'''
+		def Condition_«n_condition»():
+		«IF c.definition!==null»
+			"""
+			«c.definition»
+			"""
+		«ENDIF»
+		'''
+	}
+	
+	private def generateFuncExpressionCondition(Function function,RosettaExpression exp,int n_condition) {
+		if_cond_blocks = new ArrayList<String>()
+		var expr = generateExpression(exp,function, 0)
+		var blocks = ""
+		if (!if_cond_blocks.isEmpty()) {
+			blocks = '''	«FOR arg : if_cond_blocks»«arg»«ENDFOR»'''
+		}
+		'''
+		«blocks»	return «expr»
+		'''	
+		
+	}
+	
 	
 	private def generateConditions(Function function) {
 		var n_condition = 0;
@@ -190,6 +232,7 @@ class  PythonFunctionGenerator {
 		«ENDIF»
 		'''
 	}
+	
 	
 	private def generateAliasCondition(ShortcutDeclaration s,Function function,int n_condition) {
 		if_cond_blocks = new ArrayList<String>()

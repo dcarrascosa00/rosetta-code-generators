@@ -735,22 +735,10 @@ class PythonFunctionsTest {
     	'''
     	class RoundToNearest(ABC):
     		def evaluate(self,value, nearest, roundingMode):
-    			assert all_elements(_resolve_rosetta_attr(self, "nearest"), ">", 0)
+    			def Condition_0():
+    				return all_elements(_resolve_rosetta_attr(self, "nearest"), ">", 0)
+    			assert Condition_0()
     			roundedValue = self.doEvaluate(value, nearest, roundingMode)
-    			return roundedValue
-    		
-    		@abstractmethod
-    		def doEvaluate(self,value, nearest, roundingMode):
-    			pass
-    		
-    		
-    	
-    	class RoundToNearestDefault(RoundToNearest):
-    		def doEvaluate(self,value, nearest, roundingMode):
-    			roundedValue=None
-    			return self.assignOutput(roundedValue,value, nearest, roundingMode)
-    						
-    		def assignOutput(self,roundedValue,value, nearest, roundingMode):
     			return roundedValue
     	'''
     	assertTrue(python.toString.contains(expected))
@@ -776,30 +764,69 @@ class PythonFunctionsTest {
     		Up
     	'''.generatePython
     	
+    	println(python)
+    	
     	val expected =
     	'''
     	class RoundToNearest(ABC):
     		def evaluate(self,value, nearest, roundingMode):
-    			assert all_elements(_resolve_rosetta_attr(self, "nearest"), ">", 0)
-    			assert all_elements(_resolve_rosetta_attr(self, "value"), "<", 0)
+    			def Condition_0():
+    				return all_elements(_resolve_rosetta_attr(self, "nearest"), ">", 0)
+    			assert Condition_0()
+    			def Condition_1():
+    				return all_elements(_resolve_rosetta_attr(self, "value"), "<", 0)
+    			assert Condition_1()
     			roundedValue = self.doEvaluate(value, nearest, roundingMode)
     			return roundedValue
     		
-    		@abstractmethod
-    		def doEvaluate(self,value, nearest, roundingMode):
-    			pass
-    		
-    		
-    	
-    	class RoundToNearestDefault(RoundToNearest):
-    		def doEvaluate(self,value, nearest, roundingMode):
-    			roundedValue=None
-    			return self.assignOutput(roundedValue,value, nearest, roundingMode)
-    						
-    		def assignOutput(self,roundedValue,value, nearest, roundingMode):
-    			return roundedValue
     	'''
     	assertTrue(python.toString.contains(expected))
+    }
+    
+    @Test
+    def void testPostCondition() {
+    	val python =
+    	'''
+    	func NewFloatingPayout: <"Function specification to create the interest rate (floating) payout part of an Equity Swap according to the 2018 ISDA CDM Equity Confirmation template.">
+    		inputs: masterConfirmation EquitySwapMasterConfirmation2018 (0..1)
+    		output: interestRatePayout InterestRatePayout (1..1)
+    	
+    		post-condition InterestRatePayoutTerms: <"Interest rate payout must inherit terms from the Master Confirmation Agreement when it exists.">
+    			if masterConfirmation exists then 
+    			//interestRatePayout -> calculationPeriodDates = masterConfirmation -> equityCalculationPeriod and 
+    			interestRatePayout -> paymentDates = masterConfirmation -> equityCashSettlementDates
+    	type EquitySwapMasterConfirmation2018:
+    		equityCashSettlementDates PaymentDates (1..1) 
+    	type PaymentDates:
+    		date date(0..1)
+    	type InterestRatePayout:
+    		paymentDates PaymentDates(0..1)
+    	'''.generatePython
+    	
+    	
+    	val expected =
+    	'''
+    	class NewFloatingPayoutDefault(NewFloatingPayout):
+    		def doEvaluate(self,masterConfirmation=None):
+    			interestRatePayout=InterestRatePayout()
+    			return self.assignOutput(interestRatePayout,masterConfirmation)
+    						
+    		def assignOutput(self,interestRatePayout,masterConfirmation=None):
+    			def Condition_0():
+    			"""
+    			Interest rate payout must inherit terms from the Master Confirmation Agreement when it exists.
+    			"""
+    				def _then_fn0():
+    					return all_elements(_resolve_rosetta_attr(_resolve_rosetta_attr(self, "interestRatePayout"), "paymentDates"), "=", _resolve_rosetta_attr(_resolve_rosetta_attr(self, "masterConfirmation"), "equityCashSettlementDates"))
+    				def _else_fn0():
+    					return True	
+    				return if_cond_fn(((_resolve_rosetta_attr(self, "masterConfirmation")) is not None), _then_fn0, _else_fn0)
+    			assert Condition_0()
+    			return interestRatePayout
+    	'''
+    	
+    	assertTrue(python.toString.contains(expected))
+    	
     }
     
 
