@@ -44,22 +44,25 @@ class PythonFunctionsTest {
 		"""
 		Returns the absolute value of a number. If the argument is not negative, the argument is returned. If the argument is negative, the negation of the argument is returned.
 		"""
-			def evaluate(self,arg):
-				result = self.doEvaluate(arg)
+			def __init__(self,arg):
+				self.arg=arg
+				
+			def evaluate(self):
+				result = self.doEvaluate()
 				return result
 			
 			@abstractmethod
-			def doEvaluate(self,arg):
+			def doEvaluate(self):
 				pass
 			
 			
 		
 		class AbsDefault(Abs):
-			def doEvaluate(self,arg):
+			def doEvaluate(self):
 				result=None
-				return self.assignOutput(result,arg)
+				return self.assignOutput(result)
 							
-			def assignOutput(self,result,arg):
+			def assignOutput(self,result):
 				def returnResult_0():
 					def _then_fn0():
 						return (-1 * _resolve_rosetta_attr(self, "arg"))
@@ -73,7 +76,6 @@ class PythonFunctionsTest {
 				result = returnResult_1()
 				
 				return result
-				
 		'''
 		assertTrue(python.toString.contains(expected))
 	
@@ -102,22 +104,26 @@ class PythonFunctionsTest {
 		"""
 		Append a single value to a vector (list of numbers).
 		"""
-			def evaluate(self,value, vector=None):
-				resultVector = self.doEvaluate(value, vector)
+			def __init__(self,value, vector=None):
+				self.vector=vector
+				self.value=value
+				
+			def evaluate(self):
+				resultVector = self.doEvaluate()
 				return resultVector
 			
 			@abstractmethod
-			def doEvaluate(self,value, vector=None):
+			def doEvaluate(self):
 				pass
 			
 			
 		
 		class AppendToVectorDefault(AppendToVector):
-			def doEvaluate(self,value, vector=None):
+			def doEvaluate(self):
 				resultVector=[]
-				return self.assignOutput(resultVector,value, vector)
+				return self.assignOutput(resultVector)
 							
-			def assignOutput(self,resultVector,value, vector=None):
+			def assignOutput(self,resultVector):
 				def returnResult_0():
 					return _resolve_rosetta_attr(self, "vector")
 				addVar0 = returnResult_0()
@@ -157,14 +163,33 @@ class PythonFunctionsTest {
     		value2 int(1..1)
     	'''.generatePython
     	
+    	
 		val expected =
 		'''
+		class AppendToVector(ABC):
+		"""
+		Append a single value to a vector (list of numbers).
+		"""
+			def __init__(self,value, vector=None):
+				self.vector=vector
+				self.value=value
+				
+			def evaluate(self):
+				resultVector = self.doEvaluate()
+				return resultVector
+			
+			@abstractmethod
+			def doEvaluate(self):
+				pass
+			
+			
+		
 		class AppendToVectorDefault(AppendToVector):
-			def doEvaluate(self,value, vector=None):
+			def doEvaluate(self):
 				resultVector=[]
-				return self.assignOutput(resultVector,value, vector)
+				return self.assignOutput(resultVector)
 							
-			def assignOutput(self,resultVector,value, vector=None):
+			def assignOutput(self,resultVector):
 				def returnResult_0():
 					return _resolve_rosetta_attr(self, "value")
 				addVar0 = returnResult_0()
@@ -291,12 +316,33 @@ class PythonFunctionsTest {
     	
 		val expected =
 		'''
+		class Create_UnitType(ABC):
+		"""
+		Create UnitType with given currency or financial unit.
+		"""
+			def __init__(self,currency=None, financialUnit=None):
+				self.currency=currency
+				self.financialUnit=financialUnit
+				
+			def evaluate(self):
+				def CurrencyOrFinancialUnitExists():
+					return (((_resolve_rosetta_attr(self, "currency")) is not None) or ((_resolve_rosetta_attr(self, "financialUnit")) is not None))
+				validateCondition(CurrencyOrFinancialUnitExists(),"Error")
+				unitType = self.doEvaluate()
+				return unitType
+			
+			@abstractmethod
+			def doEvaluate(self):
+				pass
+			
+			
+		
 		class Create_UnitTypeDefault(Create_UnitType):
-			def doEvaluate(self,currency=None, financialUnit=None):
+			def doEvaluate(self):
 				unitType=UnitType()
-				return self.assignOutput(unitType,currency, financialUnit)
+				return self.assignOutput(unitType)
 							
-			def assignOutput(self,unitType,currency=None, financialUnit=None):
+			def assignOutput(self,unitType):
 				def returnResult_0():
 					return _resolve_rosetta_attr(self, "currency")
 				_set_attr("unitType",_set_attr("currency",returnResult_0)) 
@@ -340,28 +386,15 @@ class PythonFunctionsTest {
     		observedValue Price (1..1) <"Specifies the observed value as a number.">
     	'''.generatePython
     	
+    	
 		val expected = 
 		'''
-		class ResolvePerformanceReset(ABC):
-		"""
-		Defines how to resolve the reset value for a performance payout.
-		"""
-			def evaluate(self,observation, date):
-				reset = self.doEvaluate(observation, date)
-				return reset
-			
-			@abstractmethod
-			def doEvaluate(self,observation, date):
-				pass
-			
-			
-		
 		class ResolvePerformanceResetDefault(ResolvePerformanceReset):
-			def doEvaluate(self,observation, date):
+			def doEvaluate(self):
 				reset=Reset()
-				return self.assignOutput(reset,observation, date)
+				return self.assignOutput(reset)
 							
-			def assignOutput(self,reset,observation, date):
+			def assignOutput(self,reset):
 				def returnResult_0():
 				"""
 				Assigns the observed value to the reset value.
@@ -410,26 +443,12 @@ class PythonFunctionsTest {
     	
 		val expected =
 		'''
-		class FilterQuantity(ABC):
-		"""
-		Filter list of quantities based on unit type.
-		"""
-			def evaluate(self,unit, quantities=None):
-				filteredQuantities = self.doEvaluate(unit, quantities)
-				return filteredQuantities
-			
-			@abstractmethod
-			def doEvaluate(self,unit, quantities=None):
-				pass
-			
-			
-		
 		class FilterQuantityDefault(FilterQuantity):
-			def doEvaluate(self,unit, quantities=None):
+			def doEvaluate(self):
 				filteredQuantities=[]
-				return self.assignOutput(filteredQuantities,unit, quantities)
+				return self.assignOutput(filteredQuantities)
 							
-			def assignOutput(self,filteredQuantities,unit, quantities=None):
+			def assignOutput(self,filteredQuantities):
 				def returnResult_0():
 					return list(filter(lambda _resolve_rosetta_attr(self, "quantities"):all_elements(unit, "=", _resolve_rosetta_attr(self, "unit")),_resolve_rosetta_attr(self, "quantities")))
 				addVar0 = returnResult_0()
@@ -480,12 +499,28 @@ class PythonFunctionsTest {
     	
 		val expected =
 		'''
+		class ArithmeticOperation(ABC):
+			def __init__(self,n1, op, n2):
+				self.n1=n1
+				self.op=op
+				self.n2=n2
+				
+			def evaluate(self):
+				result = self.doEvaluate()
+				return result
+			
+			@abstractmethod
+			def doEvaluate(self):
+				pass
+			
+			
+		
 		class ArithmeticOperationDefault(ArithmeticOperation):
-			def doEvaluate(self,n1, op, n2):
+			def doEvaluate(self):
 				result=None
-				return self.assignOutput(result,n1, op, n2)
+				return self.assignOutput(result)
 							
-			def assignOutput(self,result,n1, op, n2):
+			def assignOutput(self,result):
 				def returnResult_0():
 					def _then_fn5():
 						return Min(_resolve_rosetta_attr(self, "n1"), _resolve_rosetta_attr(self, "n2"))
@@ -558,36 +593,40 @@ class PythonFunctionsTest {
     		set result:
     			Alias
     	'''.generatePython
-    	
+    
 		val expected =
 		'''
-		lass testAlias(ABC):
-			def evaluate(self,inp1, inp2):
-				result = self.doEvaluate(inp1, inp2)
+		class testAlias(ABC):
+			def __init__(self,inp1, inp2):
+				self.inp1=inp1
+				self.inp2=inp2
+				
+			def evaluate(self):
+				result = self.doEvaluate()
 				return result
 			
 			@abstractmethod
-			def doEvaluate(self,inp1, inp2):
+			def doEvaluate(self):
 				pass
 			
 			@abstractmethod
-			def Alias(self,inp1, inp2):
+			def Alias(self):
 				pass
 			
 		
 		class testAliasDefault(testAlias):
-			def doEvaluate(self,inp1, inp2):
+			def doEvaluate(self):
 				result=None
-				return self.assignOutput(result,inp1, inp2)
+				return self.assignOutput(result)
 							
-			def assignOutput(self,result,inp1, inp2):
+			def assignOutput(self,result):
 				def returnResult_0():
-					return self.Alias(inp1, inp2)
+					return self.Alias()
 				result = returnResult_0()
 				
 				return result
 				
-			def Alias(self,inp1, inp2):
+			def Alias(self):
 				def _then_fn0():
 					return _resolve_rosetta_attr(self, "inp1")
 				def _else_fn0():
@@ -604,43 +643,64 @@ class PythonFunctionsTest {
     	val python =
     	'''
     	type A:
-    		valueA number(1..1)
-    	type B:
-        	valueB number(1..1)
-    	type C:
-    	    valueC number(1..1)
-    	func testAlias:
-       		inputs:
- 	  			a A (1..1)
-    	    	b B (1..1)
-    	    output:
-    	    	c C (1..1)
-    	    alias Alias1:
-    	    	a->valueA
-    	    alias Alias2:
-    	    	b->valueB
-    	    set c->valueC:
-    	    	Alias1*Alias2
+    	    		valueA number(1..1)
+    	    	type B:
+    	        	valueB number(1..1)
+    	    	type C:
+    	    	    valueC number(1..1)
+    	    	func testAlias:
+    	       		inputs:
+    	 	  			a A (1..1)
+    	    	    	b B (1..1)
+    	    	    output:
+    	    	    	c C (1..1)
+    	    	    alias Alias1:
+    	    	    	a->valueA
+    	    	    alias Alias2:
+    	    	    	b->valueB
+    	    	    set c->valueC:
+    	    	    	Alias1*Alias2
     	'''.generatePython
     	
     	val expected = 
     	'''
+    	class testAlias(ABC):
+    		def __init__(self,a, b):
+    			self.a=a
+    			self.b=b
+    			
+    		def evaluate(self):
+    			c = self.doEvaluate()
+    			return c
+    		
+    		@abstractmethod
+    		def doEvaluate(self):
+    			pass
+    		
+    		@abstractmethod
+    		def Alias1(self):
+    			pass
+    		@abstractmethod
+    		def Alias2(self):
+    			pass
+    		
+    	
     	class testAliasDefault(testAlias):
-    		def doEvaluate(self,a, b):
+    		def doEvaluate(self):
     			c=C()
-    			return self.assignOutput(c,a, b)
+    			return self.assignOutput(c)
     						
-    		def assignOutput(self,c,a, b):
+    		def assignOutput(self,c):
     			def returnResult_0():
-    				return (self.Alias1(a, b) * self.Alias2(a, b))
+    				return (self.Alias1() * self.Alias2())
     			_set_attr("c",_set_attr("valueC",returnResult_0)) 
     			
     			return c
     			
-    		def Alias1(self,a, b):
+    		def Alias1(self):
     			return _resolve_rosetta_attr(_resolve_rosetta_attr(self, "a"), "valueA")
     		
-    		def Alias2(self,a, b):
+    		def Alias2(self):
     			return _resolve_rosetta_attr(_resolve_rosetta_attr(self, "b"), "valueB")
     	'''
     	
@@ -691,14 +751,33 @@ class PythonFunctionsTest {
     			date
     	'''.generatePython
     	
+    	
 		val expected = 
 		'''
+		class ResolveInterestRateObservationIdentifiers(ABC):
+		"""
+		Defines which attributes on the InterestRatePayout should be used to locate and resolve the underlier's price, for example for the reset process.
+		"""
+			def __init__(self,payout, date):
+				self.payout=payout
+				self.date=date
+				
+			def evaluate(self):
+				identifiers = self.doEvaluate()
+				return identifiers
+			
+			@abstractmethod
+			def doEvaluate(self):
+				pass
+			
+			
+		
 		class ResolveInterestRateObservationIdentifiersDefault(ResolveInterestRateObservationIdentifiers):
-			def doEvaluate(self,payout, date):
+			def doEvaluate(self):
 				identifiers=ObservationIdentifier()
-				return self.assignOutput(identifiers,payout, date)
+				return self.assignOutput(identifiers)
 							
-			def assignOutput(self,identifiers,payout, date):
+			def assignOutput(self,identifiers):
 				def returnResult_0():
 					return _resolve_rosetta_attr(_resolve_rosetta_attr(_resolve_rosetta_attr(_resolve_rosetta_attr(self, "payout"), "rateSpecification"), "floatingRate"), "rateOption")
 				_set_attr("identifiers",_set_attr("observable",_set_attr("rateOption",returnResult_0))) 
@@ -730,17 +809,26 @@ class PythonFunctionsTest {
     		Down
     		Up
     	'''.generatePython
+
     	
     	val expected = 
     	'''
     	class RoundToNearest(ABC):
-    		def evaluate(self,value, nearest, roundingMode):
+    		def __init__(self,value, nearest, roundingMode):
+    			self.value=value
+    			self.nearest=nearest
+    			self.roundingMode=roundingMode
+    			
+    		def evaluate(self):
     			def PositiveNearest():
     				return all_elements(_resolve_rosetta_attr(self, "nearest"), ">", 0)
-    			if not PositiveNearest():
-    				raise Exception("Error")
-    			roundedValue = self.doEvaluate(value, nearest, roundingMode)
+    			validateCondition(PositiveNearest(),"Error")
+    			roundedValue = self.doEvaluate()
     			return roundedValue
+    		
+    		@abstractmethod
+    		def doEvaluate(self):
+    			pass
     	'''
     	assertTrue(python.toString.contains(expected))
     }
@@ -768,17 +856,24 @@ class PythonFunctionsTest {
     	val expected =
     	'''
     	class RoundToNearest(ABC):
-    		def evaluate(self,value, nearest, roundingMode):
+    		def __init__(self,value, nearest, roundingMode):
+    			self.value=value
+    			self.nearest=nearest
+    			self.roundingMode=roundingMode
+    			
+    		def evaluate(self):
     			def PositiveNearest():
     				return all_elements(_resolve_rosetta_attr(self, "nearest"), ">", 0)
     			def valueNegative():
     				return all_elements(_resolve_rosetta_attr(self, "value"), "<", 0)
-    			if not PositiveNearest():
-    				raise Exception("Error")
-    			if not valueNegative():
-    				raise Exception("Error")
-    			roundedValue = self.doEvaluate(value, nearest, roundingMode)
+    			validateCondition(PositiveNearest(),"Error")
+    			validateCondition(valueNegative(),"Error")
+    			roundedValue = self.doEvaluate()
     			return roundedValue
+    		
+    		@abstractmethod
+    		def doEvaluate(self):
+    			pass
     	'''
     	assertTrue(python.toString.contains(expected))
     }
@@ -802,24 +897,31 @@ class PythonFunctionsTest {
     	type InterestRatePayout:
     		paymentDates PaymentDates(0..1)
     	'''.generatePython
- 
+
+ 		println(python)
     	val expected =
     	'''
     	class NewFloatingPayout(ABC):
     	"""
     	Function specification to create the interest rate (floating) payout part of an Equity Swap according to the 2018 ISDA CDM Equity Confirmation template.
     	"""
-    		def evaluate(self,masterConfirmation=None):
-    			interestRatePayout = self.doEvaluate(masterConfirmation)
+    		def __init__(self,masterConfirmation=None):
+    			self.masterConfirmation=masterConfirmation
+    			
+    		def evaluate(self):
+    			interestRatePayout = self.doEvaluate()
     			def InterestRatePayoutTerms():
     				def _then_fn0():
     					return all_elements(_resolve_rosetta_attr(_resolve_rosetta_attr(self, "interestRatePayout"), "paymentDates"), "=", _resolve_rosetta_attr(_resolve_rosetta_attr(self, "masterConfirmation"), "equityCashSettlementDates"))
     				def _else_fn0():
     					return True	
     				return if_cond_fn(((_resolve_rosetta_attr(self, "masterConfirmation")) is not None), _then_fn0, _else_fn0)
-    			if not InterestRatePayoutTerms():
-    				raise Exception("Interest rate payout must inherit terms from the Master Confirmation Agreement when it exists.")
+    			validateCondition(InterestRatePayoutTerms(),"Interest rate payout must inherit terms from the Master Confirmation Agreement when it exists.")
     			return interestRatePayout
+    		
+    		@abstractmethod
+    		def doEvaluate(self):
+    			pass
     	'''
     	assertTrue(python.toString.contains(expected))
     	

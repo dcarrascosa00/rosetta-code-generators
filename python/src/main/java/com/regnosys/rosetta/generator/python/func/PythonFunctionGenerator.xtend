@@ -98,9 +98,9 @@ class  PythonFunctionGenerator {
 				val tr = func.eContainer as RosettaModel
 				val namespace = tr.name
 				try{
-					val funcs = func.generateFunctions(version)				
+					val funcs = func.generateFunctions(version)			
 					result.put(utils.toPyFunctionFileName(namespace, func.name), 
-						utils.createImports(func.name) + funcs)
+						utils.createImportsFunc(func.name) + funcs)
 				}
 				catch(Exception ex){
 					LOGGER.error("Exception occurred generating func {}", func.name, ex)	
@@ -131,47 +131,52 @@ class  PythonFunctionGenerator {
     	val output = function.output
     	val defaultClassName = function.name+"Default"
   		
-		'''
+		'''	
+		
 		class «function.name»(ABC):
 		«IF function.definition !== null»
-			"""
-			«function.definition»
-			"""
+		"""
+		«function.definition»
+		"""
 		«ENDIF»
-			def evaluate(self,«generatesInputs(function)»):
+			def __init__(self,«generatesInputs(function)»):
+				«FOR inp : function.inputs SEPARATOR "\n"»self.«inp.name»=«inp.name»«ENDFOR»
+				
+			def evaluate(self):
 				«IF function.conditions !== null»
 					«generateFuncConditions(function,function.conditions)»
 				«ENDIF»
-				«output.name» = self.doEvaluate(«generatesInputsParameters(function)»)
+				«output.name» = self.doEvaluate()
 				«IF function.postConditions !== null»	
 					«generateFuncConditions(function,function.postConditions)»	
 				«ENDIF»
 				return «output.name»
 			
 			@abstractmethod
-			def doEvaluate(self,«generatesInputs(function)»):
+			def doEvaluate(self):
 				pass
 			
 			«getAliases(function)»	
 			
 
 		class «defaultClassName»(«function.name»):
-			def doEvaluate(self,«generatesInputs(function)»):
+			def doEvaluate(self):
 				«generateOutput(output)»
-				return self.assignOutput(«output.name»,«generatesInputsParameters(function)»)
+				return self.assignOutput(«output.name»)
 							
-			def assignOutput(self,«output.name»,«generatesInputs(function)»):
+			def assignOutput(self,«output.name»):
 				«generateConditions(function)»  
 				return «output.name»
 				
 			«IF function.shortcuts !== null»
 			«FOR shortcut : function.shortcuts»
-			def «shortcut.name»(self,«generatesInputsParameters(function)»):
+			def «shortcut.name»(self):
 			«generateAliasCondition(shortcut,function, 0)»
 			«ENDFOR»
 			«ENDIF»	
 		'''
 	}
+	
 	
 	private def generateFuncConditions(Function function,EList<Condition> cond) {
 		var n_condition = 0;
@@ -182,7 +187,7 @@ class  PythonFunctionGenerator {
 		}
 		for (Condition c: cond) {
 			var msg = c.definition !== null?c.definition:"Error"
-			res+="if not "+c.name+"():\n"+"	raise Exception("+'"'+msg+'"'+")\n"
+			res+="validateCondition("+c.name+"()"+","+'"'+msg+'"'+")\n"
 		}
 		return res
 	}
@@ -286,7 +291,7 @@ class  PythonFunctionGenerator {
 	private def getAlias(Function function,ShortcutDeclaration s) {
 		'''
 		@abstractmethod
-		def «s.name»(self,«generatesInputsParameters(function)»):
+		def «s.name»(self):
 			pass
 		'''
 	}
@@ -469,7 +474,7 @@ class  PythonFunctionGenerator {
 				callableWithArgsCall(s, expr, iflvl,function)
 			}
 			ShortcutDeclaration: {
-				'''self.«s.name»(«generatesInputsParameters(function)»)'''
+				'''self.«s.name»()'''
 			}
 			TypeParameter: {
 				'''«s.name»'''
