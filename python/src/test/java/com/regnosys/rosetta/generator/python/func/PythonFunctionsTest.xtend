@@ -735,9 +735,10 @@ class PythonFunctionsTest {
     	'''
     	class RoundToNearest(ABC):
     		def evaluate(self,value, nearest, roundingMode):
-    			def Condition_0():
+    			def PositiveNearest():
     				return all_elements(_resolve_rosetta_attr(self, "nearest"), ">", 0)
-    			assert Condition_0()
+    			if not PositiveNearest():
+    				raise Exception("Error")
     			roundedValue = self.doEvaluate(value, nearest, roundingMode)
     			return roundedValue
     	'''
@@ -764,21 +765,20 @@ class PythonFunctionsTest {
     		Up
     	'''.generatePython
     	
-    	println(python)
-    	
     	val expected =
     	'''
     	class RoundToNearest(ABC):
     		def evaluate(self,value, nearest, roundingMode):
-    			def Condition_0():
+    			def PositiveNearest():
     				return all_elements(_resolve_rosetta_attr(self, "nearest"), ">", 0)
-    			assert Condition_0()
-    			def Condition_1():
+    			def valueNegative():
     				return all_elements(_resolve_rosetta_attr(self, "value"), "<", 0)
-    			assert Condition_1()
+    			if not PositiveNearest():
+    				raise Exception("Error")
+    			if not valueNegative():
+    				raise Exception("Error")
     			roundedValue = self.doEvaluate(value, nearest, roundingMode)
     			return roundedValue
-    		
     	'''
     	assertTrue(python.toString.contains(expected))
     }
@@ -802,29 +802,25 @@ class PythonFunctionsTest {
     	type InterestRatePayout:
     		paymentDates PaymentDates(0..1)
     	'''.generatePython
-    	
-    	
+ 
     	val expected =
     	'''
-    	class NewFloatingPayoutDefault(NewFloatingPayout):
-    		def doEvaluate(self,masterConfirmation=None):
-    			interestRatePayout=InterestRatePayout()
-    			return self.assignOutput(interestRatePayout,masterConfirmation)
-    						
-    		def assignOutput(self,interestRatePayout,masterConfirmation=None):
-    			def Condition_0():
-    			"""
-    			Interest rate payout must inherit terms from the Master Confirmation Agreement when it exists.
-    			"""
+    	class NewFloatingPayout(ABC):
+    	"""
+    	Function specification to create the interest rate (floating) payout part of an Equity Swap according to the 2018 ISDA CDM Equity Confirmation template.
+    	"""
+    		def evaluate(self,masterConfirmation=None):
+    			interestRatePayout = self.doEvaluate(masterConfirmation)
+    			def InterestRatePayoutTerms():
     				def _then_fn0():
     					return all_elements(_resolve_rosetta_attr(_resolve_rosetta_attr(self, "interestRatePayout"), "paymentDates"), "=", _resolve_rosetta_attr(_resolve_rosetta_attr(self, "masterConfirmation"), "equityCashSettlementDates"))
     				def _else_fn0():
     					return True	
     				return if_cond_fn(((_resolve_rosetta_attr(self, "masterConfirmation")) is not None), _then_fn0, _else_fn0)
-    			assert Condition_0()
+    			if not InterestRatePayoutTerms():
+    				raise Exception("Interest rate payout must inherit terms from the Master Confirmation Agreement when it exists.")
     			return interestRatePayout
     	'''
-    	
     	assertTrue(python.toString.contains(expected))
     	
     }

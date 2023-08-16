@@ -47,9 +47,7 @@ import com.regnosys.rosetta.rosetta.expression.MapOperation
 import com.regnosys.rosetta.rosetta.expression.ReduceOperation
 import com.regnosys.rosetta.rosetta.expression.SortOperation
 import com.regnosys.rosetta.rosetta.expression.FilterOperation
-import com.regnosys.rosetta.rosetta.expression.EqualityOperation
 import com.regnosys.rosetta.rosetta.TypeParameter
-import com.regnosys.rosetta.rosetta.expression.InlineFunction
 import org.eclipse.emf.common.util.EList
 import com.regnosys.rosetta.rosetta.simple.Condition
 
@@ -145,6 +143,9 @@ class  PythonFunctionGenerator {
 					«generateFuncConditions(function,function.conditions)»
 				«ENDIF»
 				«output.name» = self.doEvaluate(«generatesInputsParameters(function)»)
+				«IF function.postConditions !== null»	
+					«generateFuncConditions(function,function.postConditions)»	
+				«ENDIF»
 				return «output.name»
 			
 			@abstractmethod
@@ -161,9 +162,6 @@ class  PythonFunctionGenerator {
 							
 			def assignOutput(self,«output.name»,«generatesInputs(function)»):
 				«generateConditions(function)»  
-				«IF function.postConditions !== null»	
-					«generateFuncConditions(function,function.postConditions)»	
-				«ENDIF»
 				return «output.name»
 				
 			«IF function.shortcuts !== null»
@@ -180,21 +178,18 @@ class  PythonFunctionGenerator {
 		var res = "";
 		for (Condition c : cond) {
 		    res += generateFuncConditionBoilerplate(c,n_condition)+
-		    generateFuncExpressionCondition(function,c.expression,n_condition).toString+
-		    "assert Condition_"+ n_condition.toString()+"()\n"
-			n_condition += 1;
+		    generateFuncExpressionCondition(function,c.expression,n_condition).toString
+		}
+		for (Condition c: cond) {
+			var msg = c.definition !== null?c.definition:"Error"
+			res+="if not "+c.name+"():\n"+"	raise Exception("+'"'+msg+'"'+")\n"
 		}
 		return res
 	}
 	
 	private def generateFuncConditionBoilerplate(Condition c,int n_condition) {
 		'''
-		def Condition_«n_condition»():
-		«IF c.definition!==null»
-			"""
-			«c.definition»
-			"""
-		«ENDIF»
+		def «c.name»():
 		'''
 	}
 	
