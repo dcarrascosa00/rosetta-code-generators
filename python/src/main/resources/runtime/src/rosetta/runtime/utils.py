@@ -13,7 +13,7 @@ __all__ = ['if_cond', 'if_cond_fn', 'Multiprop', 'rosetta_condition',
            'BaseDataClass', 'ConditionViolationError', 'any_elements',
            'all_elements', 'contains', 'disjoint', 'join', 
            '_resolve_rosetta_attr',
-           '_set_attr',
+           '_get_rosetta_object',
            'validateConditions',
            'check_cardinality',
            'AttributeWithMeta',
@@ -47,13 +47,11 @@ def _resolve_rosetta_attr(obj: Any|None, attrib: str) -> Any|list[Any]|None:
         return res if res else None
     return getattr(obj, attrib, None)
     
-def _set_attr(obj: Any|None,attrib:str, value: Any) -> Any|list[Any]|None:
-	if _resolve_rosetta_attr(obj,attrib) is None:
-		//instantiate new object and assing it to value
-    elif isinstance(_resolve_rosetta_attr(obj,attrib), (list, tuple)):
-        obj.attrib.extend(value)
-    else:
-    	obj.attrib = value
+def _get_rosetta_object(base_model:string, attribute:string, value:Any)->Any|list[Any]|None:
+    model_class = globals()[base_model]
+    instance_kwargs = {attribute: value}
+    instance = model_class(**instance_kwargs)
+    return instance
     
 def validateConditions(condition,msg):
 	if not condition:

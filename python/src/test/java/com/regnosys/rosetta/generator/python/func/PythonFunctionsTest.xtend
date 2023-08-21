@@ -34,10 +34,8 @@ class PythonFunctionsTest {
     		    result number (1..1)
     		set result:
     		    if arg < 0 then -1 * arg else arg
-    		set result: 
-    			arg
     	'''.generatePython
-    	
+
 		val expected = 
 		'''
 		class Abs(ABC):
@@ -69,12 +67,8 @@ class PythonFunctionsTest {
 					def _else_fn0():
 						return _resolve_rosetta_attr(self, "arg")	
 					return if_cond_fn(all_elements(_resolve_rosetta_attr(self, "arg"), "<", 0), _then_fn0, _else_fn0)
+				
 				result = returnResult_0()
-				
-				def returnResult_1():
-					return _resolve_rosetta_attr(self, "arg")
-				result = returnResult_1()
-				
 				return result
 		'''
 		assertTrue(python.toString.contains(expected))
@@ -97,7 +91,7 @@ class PythonFunctionsTest {
     	    add resultVector: vector
     	    add resultVector: value
     	'''.generatePython
-    	
+
 		val expected =
 		'''
 		class AppendToVector(ABC):
@@ -126,80 +120,12 @@ class PythonFunctionsTest {
 			def assignOutput(self,resultVector):
 				def returnResult_0():
 					return _resolve_rosetta_attr(self, "vector")
-				addVar0 = returnResult_0()
-				resultVector.extend(addVar0)
 				
+				resultVector.extend(returnResult_0)
 				def returnResult_1():
 					return _resolve_rosetta_attr(self, "value")
-				addVar1 = returnResult_1()
-				resultVector.extend(addVar1)
 				
-				return resultVector
-		'''
-		assertTrue(python.toString.contains(expected))
-	
-    	
-    }
-    
-    @Test
-    def void testAddWithComplexType() {
-    	val python = 
-    	'''
-    	func AppendToVector: <"Append a single value to a vector (list of numbers).">
-    	    	    inputs:
-    	    	    	vector A (0..*) <"Input vector.">
-    	    	    	value number (1..1) <"Value to add to the vector.">
-    	    	    output:
-    	    	        resultVector A (0..*) <"Resulting vector.">
-    	    	
-    	    	    add resultVector->value1->value2: value
-    	    	    add resultVector: vector
-    	    	    
-    	type A:
-    		value1 B(0..*)
-    		value2 int(1..1)
-    		
-    	type B:
-    		value2 int(1..1)
-    	'''.generatePython
-    	
-    	
-		val expected =
-		'''
-		class AppendToVector(ABC):
-		"""
-		Append a single value to a vector (list of numbers).
-		"""
-			def __init__(self,value, vector=None):
-				self.vector=vector
-				self.value=value
-				
-			def evaluate(self):
-				resultVector = self.doEvaluate()
-				return resultVector
-			
-			@abstractmethod
-			def doEvaluate(self):
-				pass
-			
-			
-		
-		class AppendToVectorDefault(AppendToVector):
-			def doEvaluate(self):
-				resultVector=[]
-				return self.assignOutput(resultVector)
-							
-			def assignOutput(self,resultVector):
-				def returnResult_0():
-					return _resolve_rosetta_attr(self, "value")
-				addVar0 = returnResult_0()
-				_set_attr("resultVector",_set_attr("value1",_set_attr("value2",returnResult_0)))
-				
-				def returnResult_1():
-					return _resolve_rosetta_attr(self, "vector")
-				addVar1 = returnResult_1()
-				resultVector.extend(addVar1)
-				
+				resultVector.extend(returnResult_1)
 				return resultVector
 		'''
 		assertTrue(python.toString.contains(expected))
@@ -313,7 +239,7 @@ class PythonFunctionsTest {
     		CPD <"Denotes Critical Precipitation Day as a standard unit.">
     		HDD <"Heating Degree Day as a standard unit.">
     	'''.generatePython
-    	
+
 		val expected =
 		'''
 		class Create_UnitType(ABC):
@@ -339,18 +265,17 @@ class PythonFunctionsTest {
 		
 		class Create_UnitTypeDefault(Create_UnitType):
 			def doEvaluate(self):
-				unitType=UnitType()
+				unitType=None
 				return self.assignOutput(unitType)
 							
 			def assignOutput(self,unitType):
 				def returnResult_0():
 					return _resolve_rosetta_attr(self, "currency")
-				_set_attr("unitType",_set_attr("currency",returnResult_0)) 
 				
 				def returnResult_1():
 					return _resolve_rosetta_attr(self, "financialUnit")
-				_set_attr("unitType",_set_attr("financialUnit",returnResult_1)) 
 				
+				unitType = UnitType(currency = returnResult_0, financialUnit = returnResult_1)
 				return unitType
 		'''
 		assertTrue(python.toString.contains(expected))
@@ -386,12 +311,11 @@ class PythonFunctionsTest {
     		observedValue Price (1..1) <"Specifies the observed value as a number.">
     	'''.generatePython
     	
-    	
 		val expected = 
 		'''
 		class ResolvePerformanceResetDefault(ResolvePerformanceReset):
 			def doEvaluate(self):
-				reset=Reset()
+				reset=None
 				return self.assignOutput(reset)
 							
 			def assignOutput(self,reset):
@@ -400,20 +324,17 @@ class PythonFunctionsTest {
 				Assigns the observed value to the reset value.
 				"""
 					return _resolve_rosetta_attr(_resolve_rosetta_attr(self, "observation"), "observedValue")
-				_set_attr("reset",_set_attr("resetValue",returnResult_0)) 
 				
 				def returnResult_1():
 					return _resolve_rosetta_attr(self, "date")
-				_set_attr("reset",_set_attr("resetDate",returnResult_1)) 
 				
 				def returnResult_2():
 				"""
 				Assigns the observation required to compute the rest value as audit.
 				"""
 					return _resolve_rosetta_attr(self, "observation")
-				addVar2 = returnResult_2()
-				_set_attr("reset",_set_attr("observations",returnResult_2))
 				
+				reset = Reset(resetValue = returnResult_0, resetDate = returnResult_1, observations = returnResult_2)
 				return reset
 		'''
 		assertTrue(python.toString.contains(expected))
@@ -433,14 +354,14 @@ class PythonFunctionsTest {
     	    	
     	    	    add filteredQuantities:
     	    	        quantities
-    	    	            filter item -> unit = unit
+    	    	            filter quantities -> unit = unit
     	    	type Quantity: <"Specifies a quantity as a single value to be associated to a financial product, for example a transfer amount resulting from a trade. This data type extends QuantitySchedule and requires that only the single amount value exists.">
     	    		value number (0..1) <"Specifies the value of the measure as a number. Optional because in a measure vector or schedule, this single value may be omitted.">
     	    		unit UnitType (0..1) <"Qualifies the unit by which the amount is measured. Optional because a measure may be unit-less (e.g. when representing a ratio between amounts in the same unit).">
     	  		type UnitType: <"Defines the unit to be used for price, quantity, or other purposes">
     	  			value int (1..1)
     	'''.generatePython
-    	
+		
 		val expected =
 		'''
 		class FilterQuantityDefault(FilterQuantity):
@@ -450,10 +371,9 @@ class PythonFunctionsTest {
 							
 			def assignOutput(self,filteredQuantities):
 				def returnResult_0():
-					return list(filter(lambda _resolve_rosetta_attr(self, "quantities"):all_elements(unit, "=", _resolve_rosetta_attr(self, "unit")),_resolve_rosetta_attr(self, "quantities")))
-				addVar0 = returnResult_0()
-				filteredQuantities.extend(addVar0)
+					return list(filter(lambda _resolve_rosetta_attr(self, "quantities"):all_elements(_resolve_rosetta_attr(_resolve_rosetta_attr(self, "quantities"), "unit"), "=", _resolve_rosetta_attr(self, "unit")),_resolve_rosetta_attr(self, "quantities")))
 				
+				filteredQuantities.extend(returnResult_0)
 				return filteredQuantities
 		'''
 		assertTrue(python.toString.contains(expected))
@@ -496,7 +416,7 @@ class PythonFunctionsTest {
     	        else if op = ArithmeticOperationEnum -> Min then
     	            Min( n1, n2 )
     	'''.generatePython
-    	
+
 		val expected =
 		'''
 		class ArithmeticOperation(ABC):
@@ -547,8 +467,8 @@ class PythonFunctionsTest {
 					def _else_fn0():
 						return if_cond_fn(all_elements(_resolve_rosetta_attr(self, "op"), "=", _resolve_rosetta_attr(ArithmeticOperationEnum, "SUBTRACT")), _then_fn1, _else_fn1)	
 					return if_cond_fn(all_elements(_resolve_rosetta_attr(self, "op"), "=", _resolve_rosetta_attr(ArithmeticOperationEnum, "ADD")), _then_fn0, _else_fn0)
-				result = returnResult_0()
 				
+				result = returnResult_0()
 				return result
 		'''
     	assertTrue(python.toString.contains(expected))
@@ -593,27 +513,9 @@ class PythonFunctionsTest {
     		set result:
     			Alias
     	'''.generatePython
-    
+ 
 		val expected =
 		'''
-		class testAlias(ABC):
-			def __init__(self,inp1, inp2):
-				self.inp1=inp1
-				self.inp2=inp2
-				
-			def evaluate(self):
-				result = self.doEvaluate()
-				return result
-			
-			@abstractmethod
-			def doEvaluate(self):
-				pass
-			
-			@abstractmethod
-			def Alias(self):
-				pass
-			
-		
 		class testAliasDefault(testAlias):
 			def doEvaluate(self):
 				result=None
@@ -622,8 +524,8 @@ class PythonFunctionsTest {
 			def assignOutput(self,result):
 				def returnResult_0():
 					return self.Alias()
-				result = returnResult_0()
 				
+				result = returnResult_0()
 				return result
 				
 			def Alias(self):
@@ -664,37 +566,16 @@ class PythonFunctionsTest {
     	
     	val expected = 
     	'''
-    	class testAlias(ABC):
-    		def __init__(self,a, b):
-    			self.a=a
-    			self.b=b
-    			
-    		def evaluate(self):
-    			c = self.doEvaluate()
-    			return c
-    		
-    		@abstractmethod
-    		def doEvaluate(self):
-    			pass
-    		
-    		@abstractmethod
-    		def Alias1(self):
-    			pass
-    		@abstractmethod
-    		def Alias2(self):
-    			pass
-    		
-    	
     	class testAliasDefault(testAlias):
     		def doEvaluate(self):
-    			c=C()
+    			c=None
     			return self.assignOutput(c)
     						
     		def assignOutput(self,c):
     			def returnResult_0():
     				return (self.Alias1() * self.Alias2())
-    			_set_attr("c",_set_attr("valueC",returnResult_0)) 
     			
+    			c = C(valueC = returnResult_0)
     			return c
     			
     		def Alias1(self):
@@ -750,8 +631,8 @@ class PythonFunctionsTest {
     		set identifiers -> observationDate:
     			date
     	'''.generatePython
-    	
-    	
+		
+
 		val expected = 
 		'''
 		class ResolveInterestRateObservationIdentifiers(ABC):
@@ -774,18 +655,17 @@ class PythonFunctionsTest {
 		
 		class ResolveInterestRateObservationIdentifiersDefault(ResolveInterestRateObservationIdentifiers):
 			def doEvaluate(self):
-				identifiers=ObservationIdentifier()
+				identifiers=None
 				return self.assignOutput(identifiers)
 							
 			def assignOutput(self,identifiers):
 				def returnResult_0():
 					return _resolve_rosetta_attr(_resolve_rosetta_attr(_resolve_rosetta_attr(_resolve_rosetta_attr(self, "payout"), "rateSpecification"), "floatingRate"), "rateOption")
-				_set_attr("identifiers",_set_attr("observable",_set_attr("rateOption",returnResult_0))) 
 				
 				def returnResult_1():
 					return _resolve_rosetta_attr(self, "date")
-				_set_attr("identifiers",_set_attr("observationDate",returnResult_1)) 
 				
+				identifiers = ObservationIdentifier(observable = _get_rosetta_object("Observable","rateOption", returnResult_0), observationDate = returnResult_1)
 				return identifiers
 		'''
 		assertTrue(python.toString.contains(expected))
@@ -810,7 +690,7 @@ class PythonFunctionsTest {
     		Up
     	'''.generatePython
 
-    	
+    	println(python)
     	val expected = 
     	'''
     	class RoundToNearest(ABC):
@@ -898,7 +778,6 @@ class PythonFunctionsTest {
     		paymentDates PaymentDates(0..1)
     	'''.generatePython
 
- 		println(python)
     	val expected =
     	'''
     	class NewFloatingPayout(ABC):

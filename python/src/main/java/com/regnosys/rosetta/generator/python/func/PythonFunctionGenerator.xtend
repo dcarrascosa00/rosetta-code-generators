@@ -166,6 +166,9 @@ class  PythonFunctionGenerator {
 							
 			def assignOutput(self,«output.name»):
 				«generateConditions(function)»  
+				«IF !checkBasicType(function.output) && !isList(function.output)»
+				«output.name» = «output.typeCall.type.name»(«createObject(function)»)
+				«ENDIF»
 				return «output.name»
 				
 			«IF function.shortcuts !== null»
@@ -176,6 +179,54 @@ class  PythonFunctionGenerator {
 			«ENDIF»	
 		'''
 	}
+	
+	/* ********************************************************************** */
+	/* ***	   OUTPUT GENERATION	  										*** */
+	/* ********************************************************************** */
+	
+	private def createObject(Function f) {
+		var obj = ""
+		for (var i = 0;i < f.operations.size;i++) {
+			var attr = f.operations.get(i).path.attribute
+			var typeName = attr.name
+			var param = attr.typeCall.type instanceof RosettaEnumeration ?
+			"returnResult_"+Integer.toString(i):getObjects(f.operations.get(i),i)
+			obj+=typeName+" = "+param
+			if (i!=f.operations.size-1) obj+=", "
+		}
+		'''«obj»'''
+	}
+	
+	private def getObjects(Operation op,int i) {
+		var s = op.path
+		var obj = ""
+		if (s.next !== null) {
+			var parenthesis = 0
+			obj+="_get_rosetta_object("+'"'+s.attribute.typeCall.type.name+'"'+","+'"'+
+									     s.next.attribute.name+'"'
+			while (s.next !== null) {
+				if (s.next.next===null) obj+=", returnResult_"+Integer.toString(i)+")"
+				else {
+					obj+= ", _get_rosetta_object("+'"'+s.attribute.typeCall.type.name+'"'+","+
+									         '"'+s.next.attribute.name+'"'
+					parenthesis++
+				}
+				s = s.next
+			}
+			for (var j = 0;j < parenthesis;j++) obj+=")"
+			
+		}
+		else obj+="returnResult_"+Integer.toString(i)
+		'''«obj»'''
+	} 
+	
+	/* ********************************************************************** */
+	/* ***	              END  OUTPUT GENERATION	  					   *** */
+	/* ********************************************************************** */
+	
+	/* ********************************************************************** */
+	/* ***	    Generation of function conditions and postcondition		  *** */
+	/* ********************************************************************** */
 	
 	
 	private def generateFuncConditions(Function function,EList<Condition> cond) {
@@ -211,6 +262,10 @@ class  PythonFunctionGenerator {
 		
 	}
 	
+	/* ********************************************************************** */
+	/* ***	   END of function conditions and postcondition		  *** */
+	/* ********************************************************************** */
+	
 	
 	private def generateConditions(Function function) {
 		var n_condition = 0;
@@ -233,6 +288,9 @@ class  PythonFunctionGenerator {
 		'''
 	}
 	
+	/* ********************************************************************** */
+	/* ***	   ALIAS GENERATION	  *** */
+	/* ********************************************************************** */
 	
 	private def generateAliasCondition(ShortcutDeclaration s,Function function,int n_condition) {
 		if_cond_blocks = new ArrayList<String>()
@@ -244,36 +302,6 @@ class  PythonFunctionGenerator {
 		return 
 		'''
 		«blocks»	return «expr»
-		
-		'''
-	}
-	
-	private def generateExpressionCondition(Function function, Operation op,int n_condition) {
-		if_cond_blocks = new ArrayList<String>()
-		var expr = generateExpression(op.expression,function, 0)
-		var blocks = ""
-		if (!if_cond_blocks.isEmpty()) {
-			blocks = '''	«FOR arg : if_cond_blocks»«arg»«ENDFOR»'''
-		}
-		return 
-		'''
-		«blocks»	return «expr»
-		«IF op instanceof OutputOperation»
-		    «IF op.add»
-				addVar«n_condition» = returnResult_«n_condition»()
-				«IF op.path !== null»
-				«setAttributes(op.path,function,"returnResult",n_condition)»
-				«ELSE»
-					«function.output.name».extend(addVar«n_condition»)
-				«ENDIF»
-			«ELSE»
-				«IF op.path !== null»
-				«setAttributes(op.path,function,"returnResult",n_condition)» 
-				«ELSE»
-				«function.output.name» = returnResult_«n_condition»()
-				«ENDIF»
-			«ENDIF»
-		«ENDIF»
 		
 		'''
 	}
@@ -296,22 +324,33 @@ class  PythonFunctionGenerator {
 		'''
 	}
 	
+	/* ********************************************************************** */
+	/* ***	  END ALIAS GENERATION	  										*** */
+	/* ********************************************************************** */
 	
-	def private setAttributes(Segment s,Function function,String returnResult,int n_condition) {
-		
-		var parenthesis = 0
-		var next = s
-		var out = "_set_attr("+'"'+function.output.name+'"'+","
-		while (next !== null) {
-			out+="_set_attr("+'"'+next.attribute.name+'"'+","
-			next = next.next
-			parenthesis++
+	private def generateExpressionCondition(Function function, Operation op,int n_condition) {
+		if_cond_blocks = new ArrayList<String>()
+		var expr = generateExpression(op.expression,function, 0)
+		var blocks = ""
+		if (!if_cond_blocks.isEmpty()) {
+			blocks = '''	«FOR arg : if_cond_blocks»«arg»«ENDFOR»'''
 		}
-		out+= returnResult+"_"+n_condition+")"
-		for (var j = 0;j<parenthesis;j++) out+=")"
-		'''«out»'''
+		return 
+		'''
+		«blocks»	return «expr»
 		
+		«IF op instanceof OutputOperation»
+		«IF isList(function.output)» 
+		«function.output.name».extend(returnResult_«n_condition»)
+		«ELSEIF checkBasicType(function.output)»
+		«function.output.name» = returnResult_«n_condition»()
+		«ENDIF»
+		«ENDIF»
+		'''
 	}
+	
+	
+	
 
 	def addImportsFromConditions(String variable, String namespace) {
 		val import = '''from «namespace».«variable» import «variable»'''
@@ -319,6 +358,10 @@ class  PythonFunctionGenerator {
 			importsFound.add(import)
 		}
 	}
+	
+	/* ********************************************************************** */
+	/* ***				   BEGIN expression generation				   *** */
+	/* ********************************************************************** */
 
 	def String generateExpression(RosettaExpression expr, Function function,int iflvl) {
 		switch (expr) {
@@ -528,21 +571,27 @@ class  PythonFunctionGenerator {
 			}
 		}
 	}
+	
+	/* ********************************************************************** */
+	/* ***					  END condition generation				  *** */
+	/* ********************************************************************** */
 
 	
 	
 	private def generateOutput(Attribute output) {
 		var out = ""
 		val outputName = output.name
-    	val outputType = output.getTypeCall.type.name
-    	val outputTypeFunc = (checkBasicType(output)) ?"None":outputType+"()"
 		if (output.getCard.unbounded) out = outputName+"=[]"
-		else if (output.getCard.inf === 0) out = out = outputName+"None"
-		else out=outputName+"="+outputTypeFunc
+		else out = outputName+"=None"
 		'''
 		«out»
 		'''
 	}
+	
+	private def boolean isList(Attribute output) {
+		return output.getCard.unbounded
+	}
+	
 	
 	
 	private def getImportsFromAttributes(Function function) {
@@ -587,21 +636,6 @@ class  PythonFunctionGenerator {
 			result+=input.name
 			if(input.card.inf==0)
 				result+="=None"
-			if(count<inputs.size())
-				result+=", "
-		}
-		'''«result»'''
-	}
-	
-	private def generatesInputsParameters(Function function) {
-		
-		val inputs = orderInputs(function.inputs)
-		
-		var result=""
-		var count =0
-		for(Attribute input: inputs){
-			count+=1
-			result+=input.name
 			if(count<inputs.size())
 				result+=", "
 		}
