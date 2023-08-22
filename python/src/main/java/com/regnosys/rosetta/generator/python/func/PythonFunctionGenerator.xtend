@@ -190,7 +190,7 @@ class  PythonFunctionGenerator {
 			var attr = f.operations.get(i).path.attribute
 			var typeName = attr.name
 			var param = attr.typeCall.type instanceof RosettaEnumeration ?
-			"returnResult_"+Integer.toString(i):getObjects(f.operations.get(i).path,i,"",0)
+			attr.typeCall.type.name+".returnResult_"+Integer.toString(i)+"()":getObjects(f.operations.get(i).path,i,"",0)
 			obj+=typeName+" = "+param
 			if (i!=f.operations.size-1) obj+=", "
 		}
@@ -228,7 +228,7 @@ class  PythonFunctionGenerator {
 			obj+="_get_rosetta_object("+'"'+s.attribute.typeCall.type.name+'"'+","+'"'+
 									     s.next.attribute.name+'"'
 			if (s.next.next===null) {
-				obj+=", returnResult_"+Integer.toString(i)+")"
+				obj+=", returnResult_"+Integer.toString(i)+"())"
 				for (var j = 0;j < parenthesis;j++) obj+=")"
 			}
 			else {
@@ -237,7 +237,7 @@ class  PythonFunctionGenerator {
 	
 		}
 			
-		else obj+="returnResult_"+Integer.toString(i)
+		else obj+="returnResult_"+Integer.toString(i)+"()"
 		'''«obj»'''
 		
 	}

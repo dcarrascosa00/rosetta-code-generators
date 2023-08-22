@@ -22,7 +22,7 @@ class PythonFunctionsTest {
 	 @Inject extension ModelHelper
      @Inject PythonCodeGenerator generator;
 	
-	
+
 	@Test
     def void testSimpleSet() {
     	val python = 
@@ -129,12 +129,12 @@ class PythonFunctionsTest {
 				return resultVector
 		'''
 		assertTrue(python.toString.contains(expected))
-	
-    	
+	  	
     }
     
+    //Test set with a basemodel output
     @Test
-    def void testSetWithComplexType() {
+    def void testSetWithBasemodel() {
     	val python =  
     	'''
     	func Create_UnitType: <"Create UnitType with given currency or financial unit.">
@@ -239,7 +239,7 @@ class PythonFunctionsTest {
     		CPD <"Denotes Critical Precipitation Day as a standard unit.">
     		HDD <"Heating Degree Day as a standard unit.">
     	'''.generatePython
-
+		
 		val expected =
 		'''
 		class Create_UnitType(ABC):
@@ -275,12 +275,13 @@ class PythonFunctionsTest {
 				def returnResult_1():
 					return _resolve_rosetta_attr(self, "financialUnit")
 				
-				unitType = UnitType(currency = returnResult_0, financialUnit = returnResult_1)
+				unitType = UnitType(currency = returnResult_0(), financialUnit = FinancialUnitEnum.returnResult_1())
 				return unitType
 		'''
 		assertTrue(python.toString.contains(expected))
     }
     
+    //Test add and set in the same function with basemodel output
     @Test
     def void testAddAndSet() {
     	val python = 
@@ -334,7 +335,7 @@ class PythonFunctionsTest {
 				"""
 					return _resolve_rosetta_attr(self, "observation")
 				
-				reset = Reset(resetValue = returnResult_0, resetDate = returnResult_1, observations = returnResult_2)
+				reset = Reset(resetValue = returnResult_0(), resetDate = returnResult_1(), observations = returnResult_2())
 				return reset
 		'''
 		assertTrue(python.toString.contains(expected))
@@ -380,9 +381,9 @@ class PythonFunctionsTest {
 		
     }
     
+    //Test generation with an enum
     @Test
     def void testWithEnumAttr() {
-    	//Test a set output constructor having attributes as enums
     	
     	val python =
     	'''
@@ -495,9 +496,9 @@ class PythonFunctionsTest {
     	'''.generatePython
     }
     
+    
     @Test 
     def void testAlias1() {
-    	//Test alias with simple types
     	
     	val python =
     	'''
@@ -539,9 +540,10 @@ class PythonFunctionsTest {
     	
     }
     
+    //Test alias with basemodels inputs
     @Test
     def void testAlias2() {
-    	//Test alias with complex types
+
     	val python =
     	'''
     	type A:
@@ -575,7 +577,7 @@ class PythonFunctionsTest {
     			def returnResult_0():
     				return (self.Alias1() * self.Alias2())
     			
-    			c = C(valueC = returnResult_0)
+    			c = C(valueC = returnResult_0())
     			return c
     			
     		def Alias1(self):
@@ -591,8 +593,7 @@ class PythonFunctionsTest {
     
     @Test
     def void testComplexSetConstructors() {
-    	//Test function with complex attributes in the set constructors, that means, sets that 
-    	//goes from attribute to attributes (attribute1->attribute2)
+    	
     	val python =
     	'''
     	type InterestRatePayout: <" A class to specify all of the terms necessary to define and calculate a cash flow based on a fixed, a floating or an inflation index rate. The interest rate payout can be applied to interest rate swaps and FRA (which both have two associated interest rate payouts), credit default swaps (to represent the fee leg when subject to periodic payments) and equity swaps (to represent the funding leg). The associated globalKey denotes the ability to associate a hash value to the InterestRatePayout instantiations for the purpose of model cross-referencing, in support of functionality such as the event effect and the lineage.">
@@ -665,7 +666,7 @@ class PythonFunctionsTest {
 				def returnResult_1():
 					return _resolve_rosetta_attr(self, "date")
 				
-				identifiers = ObservationIdentifier(observable = _get_rosetta_object("Observable","rateOption", returnResult_0), observationDate = returnResult_1)
+				identifiers = ObservationIdentifier(observable = _get_rosetta_object("Observable","rateOption", returnResult_0()), observationDate = returnResult_1())
 				return identifiers
 		'''
 		assertTrue(python.toString.contains(expected))
@@ -673,7 +674,7 @@ class PythonFunctionsTest {
     }
     
     @Test
-    def void testOneCondition() {
+    def void testCondition() {
     	val python =
     	'''
     	func RoundToNearest:
