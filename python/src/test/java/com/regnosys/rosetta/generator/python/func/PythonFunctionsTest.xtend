@@ -35,7 +35,7 @@ class PythonFunctionsTest {
     		set result:
     		    if arg < 0 then -1 * arg else arg
     	'''.generatePython
-
+	
 		val expected = 
 		'''
 		class Abs(ABC):
@@ -91,7 +91,7 @@ class PythonFunctionsTest {
     	    add resultVector: vector
     	    add resultVector: value
     	'''.generatePython
-
+		
 		val expected =
 		'''
 		class AppendToVector(ABC):
@@ -690,7 +690,6 @@ class PythonFunctionsTest {
     		Up
     	'''.generatePython
 
-    	println(python)
     	val expected = 
     	'''
     	class RoundToNearest(ABC):

@@ -190,14 +190,15 @@ class  PythonFunctionGenerator {
 			var attr = f.operations.get(i).path.attribute
 			var typeName = attr.name
 			var param = attr.typeCall.type instanceof RosettaEnumeration ?
-			"returnResult_"+Integer.toString(i):getObjects(f.operations.get(i),i)
+			"returnResult_"+Integer.toString(i):getObjects(f.operations.get(i).path,i,"",0)
 			obj+=typeName+" = "+param
 			if (i!=f.operations.size-1) obj+=", "
 		}
 		'''«obj»'''
 	}
 	
-	private def getObjects(Operation op,int i) {
+	//Iterative versionn
+	/*/private def getObjects(Operation op,int i) {
 		var s = op.path
 		var obj = ""
 		if (s.next !== null) {
@@ -218,7 +219,28 @@ class  PythonFunctionGenerator {
 		}
 		else obj+="returnResult_"+Integer.toString(i)
 		'''«obj»'''
-	} 
+	} */
+	
+	//Recursive version
+	private def String getObjects(Segment s,int i,String object,int parenthesis) {
+		var obj = object
+		if (s.next !== null) {
+			obj+="_get_rosetta_object("+'"'+s.attribute.typeCall.type.name+'"'+","+'"'+
+									     s.next.attribute.name+'"'
+			if (s.next.next===null) {
+				obj+=", returnResult_"+Integer.toString(i)+")"
+				for (var j = 0;j < parenthesis;j++) obj+=")"
+			}
+			else {
+				obj+= ", "+getObjects(s.next,i,obj,parenthesis+1)
+			}
+	
+		}
+			
+		else obj+="returnResult_"+Integer.toString(i)
+		'''«obj»'''
+		
+	}
 	
 	/* ********************************************************************** */
 	/* ***	              END  OUTPUT GENERATION	  					   *** */
@@ -289,7 +311,7 @@ class  PythonFunctionGenerator {
 	}
 	
 	/* ********************************************************************** */
-	/* ***	   ALIAS GENERATION	  *** */
+	/* ***	   ALIAS GENERATION	  										  *** */
 	/* ********************************************************************** */
 	
 	private def generateAliasCondition(ShortcutDeclaration s,Function function,int n_condition) {
@@ -339,12 +361,10 @@ class  PythonFunctionGenerator {
 		'''
 		«blocks»	return «expr»
 		
-		«IF op instanceof OutputOperation»
 		«IF isList(function.output)» 
 		«function.output.name».extend(returnResult_«n_condition»)
 		«ELSEIF checkBasicType(function.output)»
 		«function.output.name» = returnResult_«n_condition»()
-		«ENDIF»
 		«ENDIF»
 		'''
 	}
