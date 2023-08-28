@@ -35,7 +35,7 @@ class PythonFunctionsTest {
     		set result:
     		    if arg < 0 then -1 * arg else arg
     	'''.generatePython
-	
+		
 		val expected = 
 		'''
 		class Abs(ABC):
@@ -804,6 +804,57 @@ class PythonFunctionsTest {
     	'''
     	assertTrue(python.toString.contains(expected))
     	
+    }
+    
+    @Test
+    def void functionCallTest() {
+    	val python = 
+    	'''
+    	type InterestRatePayout: <" A class to specify all of the terms necessary to define and calculate a cash flow based on a fixed, a floating or an inflation index rate. The interest rate payout can be applied to interest rate swaps and FRA (which both have two associated interest rate payouts), credit default swaps (to represent the fee leg when subject to periodic payments) and equity swaps (to represent the funding leg). The associated globalKey denotes the ability to associate a hash value to the InterestRatePayout instantiations for the purpose of model cross-referencing, in support of functionality such as the event effect and the lineage.">
+    	    		[metadata key]
+    	    		rateSpecification RateSpecification (0..1) <"The specification of the rate value(s) applicable to the contract using either a floating rate calculation, a single fixed rate, a fixed rate schedule, or an inflation rate calculation.">
+    	    	
+    	    	type RateSpecification: <" A class to specify the fixed interest rate, floating interest rate or inflation rate.">
+    	    		floatingRate FloatingRateSpecification (0..1) <"The floating interest rate specification, which includes the definition of the floating rate index. the tenor, the initial value, and, when applicable, the spread, the rounding convention, the averaging method and the negative interest rate treatment.">
+    	    	
+    	    	type FloatingRateSpecification: <"A class defining a floating interest rate through the specification of the floating rate index, the tenor, the multiplier schedule, the spread, the qualification of whether a specific rate treatment and/or a cap or floor apply.">
+    	    		[metadata key]
+    	    	
+    	    	    rateOption FloatingRateOption (0..1)
+    	    	
+    	    	type FloatingRateOption: <"Specification of a floating rate option as a floating rate index and tenor.">
+    	    		value int(1..1)
+    	func FixedAmount:
+    	  [calculation]
+    	  inputs:
+    	    interestRatePayout InterestRatePayout (1..1)
+    	    date date (1..1)
+    	  output:
+    	    fixedAmount number (1..1)
+
+    	  alias dayCountFraction: DayCountFraction(interestRatePayout, date)
+    	func DayCountFraction:
+ 			inputs:
+ 				interestRatePayout InterestRatePayout (1..1)
+ 				date date(1..1)
+ 			output:
+ 				a number(1..1)
+    	'''.generatePython
+    	
+    	val expected = 
+    	'''
+    	class FixedAmountDefault(FixedAmount):
+    		def doEvaluate(self):
+    			fixedAmount=None
+    			return self.assignOutput(fixedAmount)
+    						
+    		def assignOutput(self,fixedAmount):
+    			return fixedAmount
+    			
+    		def dayCountFraction(self):
+    			return DayCountFractionDefault(interestRatePayout, date).evaluate()
+    	'''
+    	assertTrue(python.toString.contains(expected))
     }
     
 

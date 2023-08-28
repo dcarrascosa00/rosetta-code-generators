@@ -130,7 +130,6 @@ class  PythonFunctionGenerator {
  
     	val output = function.output
     	val defaultClassName = function.name+"Default"
-  		
 		'''	
 		
 		class «function.name»(ABC):
@@ -525,7 +524,7 @@ class  PythonFunctionGenerator {
 		val s = expr.symbol
 		switch (s) {
 			Function: {
-				'''«s.name»'''
+				'''«s.name»Default(«generatesInputs(s)»).evaluate()'''
 			}
 			Attribute: {
 				'''_resolve_rosetta_attr(self, "«s.name»")'''
@@ -538,9 +537,6 @@ class  PythonFunctionGenerator {
 			}
 			ShortcutDeclaration: {
 				'''self.«s.name»()'''
-			}
-			TypeParameter: {
-				'''«s.name»'''
 			}
 			default:
 				throw new UnsupportedOperationException("Unsupported callable type of " + s.class.simpleName)
