@@ -2,7 +2,6 @@ package com.regnosys.rosetta.generator.python.object
 
 import com.google.inject.Inject
 import com.regnosys.rosetta.generator.python.PythonCodeGenerator
-import com.regnosys.rosetta.rosetta.RosettaModel
 import com.regnosys.rosetta.tests.RosettaInjectorProvider
 import com.regnosys.rosetta.tests.util.ModelHelper
 import org.eclipse.xtext.testing.InjectWith
@@ -10,7 +9,6 @@ import org.eclipse.xtext.testing.extensions.InjectionExtension
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.^extension.ExtendWith
-
 import static org.junit.jupiter.api.Assertions.*
 
 @ExtendWith(InjectionExtension)
@@ -893,7 +891,7 @@ class ModelObjectGeneratorTest {
         assertTrue(python.toString.contains(expectedB))
     }
 	
-	
+
 	
 	def generatePython(CharSequence model) {
 		val m = model.parseRosettaWithNoErrors

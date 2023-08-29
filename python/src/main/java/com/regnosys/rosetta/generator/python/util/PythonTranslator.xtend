@@ -3,6 +3,8 @@ package com.regnosys.rosetta.generator.python.util
 
 import com.regnosys.rosetta.generator.object.ExpandedType
 
+import com.regnosys.rosetta.rosetta.simple.Attribute
+
 class PythonTranslator {
 
     static def toPythonBasicType(String typename) {
@@ -33,5 +35,14 @@ class PythonTranslator {
 		else
         return type.name.toFirstUpper
     }
+    
+    def toPythonType(Attribute attr) {
+ 		var type = attr.getTypeCall.type.name
+        val basicType = PythonTranslator.toPythonBasicType(type);
+        if (basicType !== null)
+            return basicType
+        return type.toFirstUpper
+    }
+    
 
 }

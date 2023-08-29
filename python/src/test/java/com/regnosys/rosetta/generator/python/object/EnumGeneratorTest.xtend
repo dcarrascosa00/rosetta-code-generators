@@ -3,7 +3,6 @@ package com.regnosys.rosetta.generator.python.object
 import com.google.inject.Inject
 import com.regnosys.rosetta.generator.java.enums.EnumHelper
 import com.regnosys.rosetta.generator.python.PythonCodeGenerator
-import com.regnosys.rosetta.rosetta.RosettaModel
 import com.regnosys.rosetta.tests.RosettaInjectorProvider
 import com.regnosys.rosetta.tests.util.ModelHelper
 import org.eclipse.xtext.testing.InjectWith
